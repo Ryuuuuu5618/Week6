@@ -75,7 +75,7 @@ void mm_free(void *ptr);
 void *mm_realloc(void *ptr, size_t size);
 void *extend_heap(size_t words);
 void *coalesce(void *bp);
-void *find(void *bp, size_t asize);
+void *find(size_t asize);
 void place(void *bp, size_t asize);
 
 int mm_init(void)
@@ -110,7 +110,6 @@ int mm_init(void)
  *     Always allocate a block whose size is a multiple of the alignment.
  * 최소 size 바이트 크기의 할당된 블록 페이로드에 대한 포인터를 반환
  */
-static void *last_bp = NULL;
 void *mm_malloc(size_t size)
 {
     // 늘릴 사이즈 x -> 얼리 리턴
@@ -153,7 +152,7 @@ void *mm_malloc(size_t size)
 
     //     bp = NEXT_BLKP(bp);
     // }
-    if ((bp = (char *)find(bp, asize)) != NULL)
+    if ((bp = (char *)find(asize)) != NULL)
     {
         place(bp, asize);
         return bp;
@@ -305,21 +304,36 @@ void *coalesce(void *bp)
 
     return bp;
 }
-
-void *find(void *bp, size_t asize)
+static void *last_bp = NULL;
+void *find(size_t asize)
 {
-    char *bp = (last_bp != NULL) ? last_bp : heap_listp + WSIZE;
-
+    // char *bp = (last_bp != NULL) ? last_bp : heap_listp + DSIZE;
+    char *bp = heap_listp + DSIZE;
     while (GET_SIZE(HDRP(bp)) != 0)
     {
         // 할당 가능
-        if (!GET_ALLOC(HDRP(bp)) && GET_SIZE(HDRP(bp)) >= asize)
+        if (GET_SIZE(HDRP(bp)) >= asize && !GET_ALLOC(HDRP(bp)))
         {
+            last_bp = bp;
             return bp;
         }
 
         bp = NEXT_BLKP(bp);
     }
+
+    // bp = heap_listp + DSIZE;
+
+    // while (bp != last_bp)
+    // {
+    //     // 할당 가능
+    //     if (GET_SIZE(HDRP(bp)) >= asize && !GET_ALLOC(HDRP(bp)))
+    //     {
+    //         last_bp = bp;
+    //         return bp;
+    //     }
+
+    //     bp = NEXT_BLKP(bp);
+    // }
 
     return NULL;
 }
