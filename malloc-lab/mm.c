@@ -304,7 +304,7 @@ void *coalesce(void *bp)
 
     return bp;
 }
-static void *last_bp = NULL;
+// static void *last_bp = NULL;
 void *find(size_t asize)
 {
     // char *bp = (last_bp != NULL) ? last_bp : heap_listp + DSIZE;
@@ -314,7 +314,7 @@ void *find(size_t asize)
         // 할당 가능
         if (GET_SIZE(HDRP(bp)) >= asize && !GET_ALLOC(HDRP(bp)))
         {
-            last_bp = bp;
+            //last_bp = bp;
             return bp;
         }
 
